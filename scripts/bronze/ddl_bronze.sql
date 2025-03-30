@@ -11,149 +11,70 @@ Script Purpose:
 ====================================================================
 */
 
-CALL bronze.load_bronze();
+--If the table exists in the database -> drop table -> create table
+IF OBJECT_ID('bronze.crm_cust_info', 'U') IS NOT NULL
+	DROP TABLE bronze.crm_cust_info
+CREATE TABLE bronze.crm_cust_info (
+	cst_id INT,
+	cst_key VARCHAR(50),
+	cst_firstname VARCHAR(50),
+	cst_lastname VARCHAR(50),
+	cst_marital_status VARCHAR(50),
+	cst_gndr VARCHAR(50),
+	cst_create_date DATE
+);
 
-DROP PROCEDURE IF EXISTS bronze.load_bronze;
+--If the table exists in the database -> drop table -> create table
+IF OBJECT_ID('bronze.crm_sales_details', 'U') IS NOT NULL
+	DROP TABLE bronze.crm_sales_details
+CREATE TABLE bronze.crm_sales_details(
+	sls_ord_num VARCHAR(50),
+	sls_prd_key VARCHAR(50),
+	sls_cust_id INT,
+	sls_order_dt INT,
+	sls_ship_dt INT,
+	sls_due_dt INT,
+	sls_sales INT,
+	sls_quantity INT,
+	sls_price INT
+);
 
-CREATE PROCEDURE bronze.load_bronze()
-LANGUAGE plpgsql
-AS $$
+--If the table exists in the database -> drop table -> create table
+IF OBJECT_ID('bronze.crm_prd_info', 'U') IS NOT NULL
+	DROP TABLE bronze.crm_prd_info
+CREATE TABLE bronze.crm_prd_info(
+	prd_id INT,
+	prd_key VARCHAR(50),
+	prd_nm VARCHAR(50),
+	prd_cost INT,
+	prd_line VARCHAR(50),
+	prd_start_dt DATE,
+	prd_end_dt DATE
+);
 
-DECLARE
-start_time TIMESTAMP;
-end_time TIMESTAMP;
-duration INTERVAL;
-batch_start_time TIMESTAMP;
-batch_end_time TIMESTAMP;
-batch_duration INTERVAL;
+--If the table exists in the database -> drop table -> create table
+IF OBJECT_ID('bronze.erp_cust_az12', 'U') IS NOT NULL
+	DROP TABLE bronze.erp_cust_az12
+CREATE TABLE bronze.erp_cust_az12(
+	cid VARCHAR(50),
+	bdate DATE,
+	gen VARCHAR(50)
+);
 
-BEGIN
-	BEGIN
-		batch_start_time := clock_timestamp(); 
-	    RAISE NOTICE '===============================';
-	    RAISE NOTICE 'Loading Bronze Layer';
-	    RAISE NOTICE '===============================';
+--If the table exists in the database -> drop table -> create table
+IF OBJECT_ID('bronze.erp_loc_a101', 'U') IS NOT NULL
+	DROP TABLE bronze.erp_loc_a101
+CREATE TABLE bronze.erp_loc_a101(
+	cid VARCHAR(50),
+	cntry VARCHAR(50)
+);
 
-        RAISE NOTICE '-------------------------------';
-        RAISE NOTICE ' Loading CRM Tables';
-        RAISE NOTICE '-------------------------------';
-		
-		start_time := clock_timestamp(); 
-        
-		RAISE NOTICE '>> Truncating Table: bronze.crm_cust_info';
-        TRUNCATE TABLE bronze.crm_cust_info;
-
-        RAISE NOTICE '>> Inserting Data Into: bronze.crm_cust_info';
-        COPY bronze.crm_cust_info
-        FROM '/Users/jveg/Courses/13_yt_sql-data-warehouse-project/sql-data-warehouse-project/datasets/source_crm/cust_info.csv'
-        WITH (FORMAT csv, HEADER, DELIMITER ',');
-		
-		end_time := clock_timestamp(); 
-		duration := end_time - start_time;
-		
-		RAISE NOTICE '>> Load Duration: % seconds ', EXTRACT(SECONDS FROM duration);
-		RAISE NOTICE '>> --------------------';
-
-		start_time := clock_timestamp(); 
-		
-        RAISE NOTICE '>> Truncating Table: bronze.crm_sales_details';
-        TRUNCATE TABLE bronze.crm_sales_details;
-
-        RAISE NOTICE '>> Inserting Data Into: bronze.crm_sales_details';
-        COPY bronze.crm_sales_details
-        FROM '/Users/jveg/Courses/13_yt_sql-data-warehouse-project/sql-data-warehouse-project/datasets/source_crm/sales_details.csv'
-        WITH (FORMAT csv, HEADER, DELIMITER ',');
-
-		end_time := clock_timestamp(); 
-		duration := end_time - start_time;
-		
-		RAISE NOTICE '>> Load Duration: % seconds ', EXTRACT(SECONDS FROM duration);
-		RAISE NOTICE '>> --------------------';
-
-		start_time := clock_timestamp(); 
-		
-        RAISE NOTICE '>> Truncating Table: bronze.crm_prd_info';
-        TRUNCATE TABLE bronze.crm_prd_info;
-
-        RAISE NOTICE '>> Inserting Data Into: bronze.crm_prd_info';
-        COPY bronze.crm_prd_info
-        FROM '/Users/jveg/Courses/13_yt_sql-data-warehouse-project/sql-data-warehouse-project/datasets/source_crm/prd_info.csv'
-        WITH (FORMAT csv, HEADER, DELIMITER ',');
-
-		end_time := clock_timestamp(); 
-		duration := end_time - start_time;
-		
-		RAISE NOTICE '>> Load Duration: % seconds ', EXTRACT(SECONDS FROM duration);
-		RAISE NOTICE '>> --------------------';
-
-        RAISE NOTICE '-------------------------------';
-        RAISE NOTICE ' Loading ERP Tables';
-        RAISE NOTICE '-------------------------------';
-
-		start_time := clock_timestamp(); 
-		
-        RAISE NOTICE '>> Truncating Table: bronze.erp_cust_az12';
-        TRUNCATE TABLE bronze.erp_cust_az12;
-
-        RAISE NOTICE '>> Inserting Data Into: bronze.erp_cust_az12';
-        COPY bronze.erp_cust_az12
-        FROM '/Users/jveg/Courses/13_yt_sql-data-warehouse-project/sql-data-warehouse-project/datasets/source_erp/CUST_AZ12.csv'
-        WITH (FORMAT csv, HEADER, DELIMITER ',');
-
-		end_time := clock_timestamp(); 
-		duration := end_time - start_time;
-		
-		RAISE NOTICE '>> Load Duration: % seconds ', EXTRACT(SECONDS FROM duration);
-		RAISE NOTICE '>> --------------------';
-
-		start_time := clock_timestamp(); 
-		
-        RAISE NOTICE '>> Truncating Table: bronze.erp_loc_a101';
-        TRUNCATE TABLE bronze.erp_loc_a101;
-
-        RAISE NOTICE '>> Inserting Data Into: bronze.erp_loc_a101';
-        COPY bronze.erp_loc_a101
-        FROM '/Users/jveg/Courses/13_yt_sql-data-warehouse-project/sql-data-warehouse-project/datasets/source_erp/LOC_A101.csv'
-        WITH (FORMAT csv, HEADER, DELIMITER ',');
-
-		end_time := clock_timestamp(); 
-		duration := end_time - start_time;
-		
-		RAISE NOTICE '>> Load Duration: % seconds ', EXTRACT(SECONDS FROM duration);
-		RAISE NOTICE '>> --------------------';
-
-		start_time := clock_timestamp(); 
-		
-        RAISE NOTICE '>> Truncating Table: bronze.erp_px_cat_g1v2';
-        TRUNCATE TABLE bronze.erp_px_cat_g1v2;
-
-        RAISE NOTICE '>> Inserting Data Into: bronze.erp_px_cat_g1v2';
-        COPY bronze.erp_px_cat_g1v2
-        FROM '/Users/jveg/Courses/13_yt_sql-data-warehouse-project/sql-data-warehouse-project/datasets/source_erp/PX_CAT_G1V2.csv'
-        WITH (FORMAT csv, HEADER, DELIMITER ',');
-
-		end_time := clock_timestamp(); 
-		duration := end_time - start_time;
-		
-		RAISE NOTICE '>> Load Duration: % seconds ', EXTRACT(SECONDS FROM duration);
-		RAISE NOTICE '>> --------------------';
-
-		batch_end_time := clock_timestamp(); 
-		batch_duration := batch_end_time - batch_start_time;
-		
-        RAISE NOTICE '===============================';
-        RAISE NOTICE 'Bronze Layer Loaded Successfully!';
-		RAISE NOTICE 'Total Load Duration: % seconds ', EXTRACT(SECONDS FROM batch_duration);
-        RAISE NOTICE '===============================';
-
-    EXCEPTION
-        WHEN OTHERS THEN
-            RAISE NOTICE '===============================';
-            RAISE NOTICE 'ERROR OCCURRED DURING LOADING BRONZE LAYER';
-            RAISE NOTICE 'Error message: %', SQLERRM;
-            RAISE NOTICE 'SQL state: %', SQLSTATE;
-            RAISE NOTICE '===============================';
-    END;
-
-END;
-$$;
+--If the table exists in the database -> drop table -> create table
+IF OBJECT_ID('bronze.erp_px_cat_g1v2', 'U') IS NOT NULL
+	DROP TABLE bronze.erp_px_cat_g1v2
+CREATE TABLE bronze.erp_px_cat_g1v2(
+	"id" VARCHAR(50),
+	cat VARCHAR(50),
+	subcat VARCHAR(50),
+	maintenance VARCHAR(50)
+);
